@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.png" type="image/x-icon" />
+    <title>SSHFilesWeb</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+		<center><h1><strong style="color: white; display: table; background-color: #630700;">SSHFilesWebPinups</strong></H1></center>
+        </header>
+        <div class="background-scene">
+            <div class="form-container">
+                <label for="remoteIP">IP Address:</label>
+                <input type="text" id="remoteIP" name="remoteIP" class="autocomplete">
+
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username">
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password">
+
+                <label for="port">Port:</label>
+                    <input type="number" id="port" value="22">
+                <div class="buttons">
+                    <button id="connectButton">Connect</button>
+                    <button id="uploadButton" disabled>Upload File</button>
+                  </div>
+                <div class="form-group">
+                    <input type="file" id="fileInput">
+                </div>
+            </div>
+            <div class="file-list" id="fileListContainer">
+    		<img id="placeholderImage" src="bassbabe.png" alt="Placeholder Image" class="centered-image" style="display: none;">
+   			 <div id="fileList"></div>
+			</div>
+            </div>
+            <div><center><h2><strong style="color: white; display: table; background-color: #630700;">Themes:</strong></H2></center>
+			<center><button class="darkblue" onclick="document.location='index.html'">Default</button>&nbsp;&nbsp;<button class="darkgreen" onclick="document.location='index_two.html'">N.S.F.W</button>&nbsp;&nbsp;<button class="dark" onclick="document.location='dark.html'">Darker</button></center>
+            <div class="progress-bar-container" id="progressBarContainer">
+            <div class="progress-bar" id="progressBar"></div>
+			</div>
+      	  </div>
+        <center><strong><a href="https://www.beeralator.com" class="centered-link">beeralator.com</a></strong></center>
+     </div>
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" id="openDir">Open Directory</div>
+        <div class="context-menu-item" id="downloadDir">Download Directory</div>
+    </div>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let currentDirectory = '';
+    let selectedItem = null;
+    let isConnected = false; // Track connection state
+    const placeholderImage = document.getElementById('placeholderImage');
+    placeholderImage.style.display = 'block'; // Show the placeholder image
+    const progressWebSocket = new WebSocket("ws://localhost:8080/progress");
+
+    progressWebSocket.onmessage = function(event) {
+        const progress = parseInt(event.data, 10);
+        updateProgressBar(progress);
+    };
+
+    progressWebSocket.onerror = function(error) {
+        console.error("WebSocket error:", error);
+    };
+
+    function showProgressBar() {
+        const progressBarContainer = document.getElementById('progressBarContainer');
+        progressBarContainer.style.display = 'block';
+        updateProgressBar(0);
+    }
+
+    function updateProgressBar(percent) {
+        const progressBar = document.getElementById('progressBar');
+        progressBar.style.width = percent + '%';
+        progressBar.textContent = percent + '%';
+    }
+
+    function hideProgressBar() {
+        const progressBarContainer = document.getElementById('progressBarContainer');
+        progressBarContainer.style.display = 'none';
+    }
+
+    document.getElementById('uploadButton').addEventListener('click', async () => {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        showProgressBar();
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/ssh/upload', true);
+
+        xhr.onload = () => {
+            hideProgressBar();
+            const filename = file.name;
+            if (xhr.status === 200) {
+                Swal.fire({
+                    iconHtml: '<img src="greenbeer.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Success!',
+                    html: `<strong><span style="color: cyan">Uploading the file:</span></strong><br><span style="color: white">${filename}</span><br><strong><span style="color: cyan">was successful.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "red",
+                    background: '#2b0300'
+                });
+                listFiles(currentDirectory); // Refresh the file list after upload
+            } else {
+                Swal.fire({
+                    iconHtml: '<img src="redbeer.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title-red',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Error!',
+                    html: `<strong><span style="color: cyan">Uploading the file:</span></strong><br><span style="color: white">${filename}</span><br><strong><span style="color: cyan">failed.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "red",
+                    background: '#2b0300'
+                });
+            }
+        };
+
+        xhr.send(formData);
+    });
+
+    async function downloadFile(directory, filename) {
+        showProgressBar();
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `/api/ssh/download?remoteFilePath=${directory}/${filename}`, true);
+        xhr.responseType = 'blob';
+
+        xhr.addEventListener('progress', (event) => {
+            if (event.lengthComputable) {
+                const percentComplete = Math.round((event.loaded / event.total) * 100);
+                updateProgressBar(percentComplete);
+            }
+        });
+
+        xhr.onload = () => {
+            hideProgressBar();
+            if (xhr.status === 200) {
+                const blob = xhr.response;
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                Swal.fire({
+                    iconHtml: '<img src="greenbeer.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Success!',
+                    html: `<strong><span style="color: cyan">Downloading the file:</span></strong><br><span style="color: white">${filename}</span><br><strong><span style="color: cyan">was successful.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "red",
+                    background: '#2b0300'
+                });
+                listFiles(currentDirectory); // Refresh the file list after upload
+            } else {
+                Swal.fire({
+                    iconHtml: '<img src="redbeer.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title-red',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Error!',
+                    html: `<strong><span style="color: cyan">Downloading the file:</span></strong><br><span style="color: white">${filename}</span><br><strong><span style="color: cyan">failed.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "red",
+                    background: '#2b0300'
+                });
+            }
+        };
+
+        xhr.send();
+    }
+
+    async function downloadDirectory(directory) {
+        showProgressBar();
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `/api/ssh/download-directory?directory=${encodeURIComponent(directory)}`, true);
+        xhr.responseType = 'blob';
+
+        xhr.addEventListener('progress', (event) => {
+            if (event.lengthComputable) {
+                const percentComplete = Math.round((event.loaded / event.total) * 100);
+                console.log(`Progress: ${percentComplete}% (Loaded: ${event.loaded} bytes, Total: ${event.total} bytes)`);
+                updateProgressBar(percentComplete);
+            }
+        });
+
+        xhr.onload = () => {
+            hideProgressBar();
+            if (xhr.status === 200) {
+                const blob = xhr.response;
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `${directory.split('/').pop()}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                Swal.fire({
+                    iconHtml: '<img src="greenbeer.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Success!',
+                    html: `<strong><span style="color: cyan">Uploading the directory:</span></strong><br><span style="color: white">${directory}</span><br><strong><span style="color: cyan">was successful.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "red",
+                    background: '#2b0300'
+                });
+                listFiles(currentDirectory); // Refresh the file list after upload
+            } else {
+                Swal.fire({
+                    iconHtml: '<img src="redbeer.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title-red',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Error!',
+                    html: `<strong><span style="color: cyan">Uploading the directory:</span></strong><br><span style="color: white">${directory}</span><br><strong><span style="color: cyan">failed.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "red",
+                    background: '#2b0300'
+                });
+            }
+        };
+
+        xhr.send();
+    }
+
+    function updateLocalStorage(key, value) {
+        let history = JSON.parse(localStorage.getItem(key) || "[]");
+        if (!history.includes(value)) {
+            history.push(value);
+            localStorage.setItem(key, JSON.stringify(history));
+        }
+    }
+
+    function getSuggestions(key, query) {
+        let history = JSON.parse(localStorage.getItem(key) || "[]");
+        return history.filter(item => item.startsWith(query));
+    }
+
+    function showSuggestions(input) {
+        const query = input.value;
+        const key = input.id;
+        const suggestions = getSuggestions(key, query);
+
+        clearSuggestions();
+
+        let list = document.createElement('div');
+        list.className = 'autocomplete-list';
+
+        // Append list to body to avoid any relative positioning issues
+        document.body.appendChild(list);
+
+        // Get the bounding rectangle of the input field
+        const inputRect = input.getBoundingClientRect();
+
+        // Position the list
+        list.style.position = 'absolute';
+        list.style.top = `${inputRect.bottom + window.scrollY}px`; // Calculate the top based on viewport
+        list.style.left = `${inputRect.left + window.scrollX}px`;  // Calculate the left based on viewport
+        list.style.width = `${inputRect.width}px`;
+
+        // Add suggestions
+        suggestions.forEach(suggestion => {
+            let item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            item.textContent = suggestion;
+            item.addEventListener('click', () => {
+                input.value = suggestion;
+                if (key === 'remoteIP' || key === 'username') {
+                    autofillPassword();
+                }
+                clearSuggestions();
+            });
+            list.appendChild(item);
+        });
+    }
+
+    function clearSuggestions() {
+        let lists = document.querySelectorAll('.autocomplete-list');
+        lists.forEach(list => list.remove());
+    }
+
+    function autofillPassword() {
+        const remoteIP = document.getElementById('remoteIP').value;
+        const username = document.getElementById('username').value;
+        const savedPasswords = JSON.parse(localStorage.getItem('savedPasswords') || "{}");
+
+        if (savedPasswords[remoteIP] && savedPasswords[remoteIP][username]) {
+            document.getElementById('password').value = savedPasswords[remoteIP][username];
+        } else {
+            document.getElementById('password').value = "";
+            
+        }
+    }
+
+    document.querySelectorAll('.autocomplete').forEach(input => {
+        input.addEventListener('input', () => {
+            clearSuggestions();
+            if (input.value) {
+                showSuggestions(input);
+            }
+        });
+    });
+
+    document.getElementById('connectButton').addEventListener('click', async () => {
+        if (isConnected) {
+            await disconnect();
+        } else {
+            await connect();
+        }
+    });
+
+    async function connect() {
+        const remoteIP = document.getElementById('remoteIP').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const port = document.getElementById('port').value;
+
+        const response = await fetch('/api/ssh/connect', {
+            method: 'POST',
+            body: new URLSearchParams({
+                remoteIP,
+                username,
+                password,
+                port
+            })
+        });
+        const result = await response.json();
+        if (response.ok) {
+            document.getElementById('uploadButton').disabled = false;
+            currentDirectory = result.currentDirectory; // Set current directory
+            isConnected = true; // Update connection state
+            document.getElementById('connectButton').textContent = 'Disconnect';
+            await listFiles(currentDirectory); // Populate file list
+        } else {
+        	Swal.fire({
+                iconHtml: '<img src="redbeer.gif" width="100px" height="100px"> ',
+                customClass: {
+                    icon: 'custom-swal-icon',
+                    title: 'custom-swal-title-red',
+                    popup: 'swal2-text'
+                },
+                title: 'Error!',
+                html: `<strong><span style="color: cyan">Connecting failed.</span></strong>`,
+                width: '400px',
+                confirmButtonColor: "red",
+                background: '#2b0300'
+            });
+        }
+    }
+
+    async function disconnect() {
+       
+            document.getElementById('uploadButton').disabled = true;
+            isConnected = false; // Update connection state
+            document.getElementById('connectButton').textContent = 'Disconnected';
+            document.getElementById('connectButton').disabled = true;
+
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            placeholderImage.style.display = 'block'; // Show the placeholder image
+            Swal.fire({
+                iconHtml: '<img src="greenbeer.gif" width="100px" height="100px"> ',
+                customClass: {
+                    icon: 'custom-swal-icon',
+                    title: 'custom-swal-title',
+                    popup: 'swal2-text'
+                },
+                title: 'Success!',
+                html: `<strong><span style="color: cyan">Disconnecting successful</span></strong><br><span style="color: white">${filename}</span><br><strong><span style="color: cyan">was successful.</span></strong>`,
+                width: '400px',
+                confirmButtonColor: "red",
+                background: '#2b0300'
+            });
+            const response = await fetch('/api/ssh/disconnect', {
+                method: 'POST'
+            });
+            const result = await response.json();
+
+            if (!response.ok) {
+            	Swal.fire({
+                    iconHtml: '<img src="redbeer.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title-red',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Error!',
+                    html: `<strong><span style="color: cyan">Disonnecting failed</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "red",
+                    background: '#2b0300'
+            });
+        }
+    }
+
+    // Call this function after connecting to hide the placeholder image
+    function hidePlaceholderImage() {
+        placeholderImage.style.display = 'none'; // Hide the placeholder image
+    }
+
+    async function listFiles(directory) {
+        try {
+            const response = await fetch(`/api/ssh/list?directory=${encodeURIComponent(directory)}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch file list');
+            }
+            const fileList = await response.json();
+
+            const fileListElement = document.getElementById('fileList');
+            placeholderImage.style.display = 'none';
+            fileListElement.innerHTML = '';
+
+            if (!placeholderImage) {
+                console.error('placeholderImage element not found.');
+                return;
+            }
+
+            if (Array.isArray(fileList) && fileList.length > 0) {
+                placeholderImage.style.display = 'none';
+                fileList.forEach(file => {
+                    const div = document.createElement('div');
+                    div.textContent = file.name;
+                    div.classList.add('file-item');
+                    div.dataset.type = file.type;
+                    div.addEventListener('click', async (event) => {
+                        if (event.button === 0) {
+                            if (file.type === 'file') {
+                                await downloadFile(directory, file.name);
+                            } else if (file.type === 'directory') {
+                                await openDirectory(directory, file.name);
+                            }
+                        }
+                    });
+                    div.addEventListener('contextmenu', (event) => {
+                        event.preventDefault();
+                        if (file.type === 'directory') {
+                            selectedItem = file;
+                            showContextMenu(event);
+                        }
+                    });
+                    fileListElement.appendChild(div);
+                });
+            } else {
+                placeholderImage.style.display = 'block';
+            }
+        } catch (error) {
+            console.error("Failed to list files:", error);
+        }
+    }
+
+    async function openDirectory(currentDir, dirName) {
+        const newDirectory = `${currentDir}/${dirName}`;
+        currentDirectory = newDirectory; // Update the current directory
+        await listFiles(newDirectory);
+    }
+
+    document.getElementById('openDir').addEventListener('click', async () => {
+        if (selectedItem) {
+            await openDirectory(currentDirectory, selectedItem.name);
+        }
+    });
+
+    document.getElementById('downloadDir').addEventListener('click', async () => {
+        if (selectedItem) {
+            await downloadDirectory(`${currentDirectory}/${selectedItem.name}`);
+        }
+    });
+
+    function showContextMenu(event) {
+        const contextMenu = document.getElementById('contextMenu');
+        contextMenu.style.top = `${event.clientY}px`;
+        contextMenu.style.left = `${event.clientX}px`;
+        contextMenu.style.display = 'block';
+
+        document.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+        }, { once: true });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.matches('.autocomplete, .autocomplete-list, .autocomplete-item')) {
+            clearSuggestions();
+        }
+    });
+    
+    document.getElementById('remoteIP').addEventListener('blur', autofillPassword);
+    document.getElementById('username').addEventListener('blur', autofillPassword);
+});
+
+</script>
+</body>
+</html>

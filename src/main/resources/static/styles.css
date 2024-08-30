@@ -1,0 +1,319 @@
+.scaleA {
+    width: 100%;
+    max-width: max-content;
+}
+body {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #222;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    background-image: url('mostbeerstwo.png'); /* Add your bar scene background image here */
+    
+}
+
+.container {
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.background-scene {
+    background-color:: #00000000; /* Add your bar scene background image here */
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    padding: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.form-container {
+    position: relative; /* Ensure the context for absolute positioning */
+    background: rgba(44, 2, 2, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+}
+
+.form-container label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ddd;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #630700;
+    color: white;
+		}
+.autocomplete-list {
+    background-color: #2b0300; /* Background color */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000; /* Ensure it's on top of other elements */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.autocomplete-item {
+    padding: 10px;
+    cursor: pointer;
+    color: white;
+}
+
+.autocomplete-item:hover {
+    background-color: red; /* Highlight color */
+}
+		.buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .buttons button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #a60003;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .buttons button:hover {
+            background: red;
+            transform: scale(1.05);
+        }
+        .buttons button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+		.file-list {
+           flex: 1;
+           width: 300px;
+           height: 500px; /* Ensure height is defined with units */
+           border: 2px solid #ccc;
+           border-radius: 10px;
+           overflow-y: auto; /* Automatically adds scrollbar when needed */
+           padding: 10px;
+           box-sizing: border-box;
+           position: relative; /* Add relative positioning */
+           background: rgba(44, 2, 2, 0.9);
+           box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+       }
+       .file-list img.centered-image {
+           display: block;
+           margin: 0;
+           position: absolute; /* Position the image absolutely */
+           top: 50%; /* Center vertically */
+           left: 50%; /* Center horizontally */
+           transform: translate(-50%, -50%); /* Adjust the image's center point */
+       }
+               
+         /* Custom scrollbar styles */
+        .file-list::-webkit-scrollbar {
+            width: 12px; /* Width of the scrollbar */
+        }
+        .file-list::-webkit-scrollbar-thumb {
+            background-color: red; /* Same blue as the buttons */
+            border-radius: 10px; /* Rounded corners */
+        }
+        .file-list::-webkit-scrollbar-track {
+            background-color: #f1f1f1; /* Background color of the scrollbar track */
+        }
+        .file-item::-webkit-scrollbar {
+            width: 12px; /* Width of the scrollbar */
+        }
+        .file-item::-webkit-scrollbar-thumb {
+            background-color: red; /* Same blue as the buttons */
+            border-radius: 10px; /* Rounded corners */
+        }
+        .file-item::-webkit-scrollbar-track {
+            background-color: #f1f1f1; /* Background color of the scrollbar track */
+        }
+        .file-item {
+            overflow-y: auto;
+            cursor: pointer;
+            padding: 5px;
+            margin: 5px 0;
+            border-bottom: 1px solid #eee;
+            color: white;
+        }
+        .file-item:hover {
+            background-color: red;
+        }
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-wrapper input {
+            margin-right: 10px;
+        }
+          /* Media queries for responsive design */
+         @media (max-width: 768px) {
+        .content-container {
+        	flex-direction: column;
+        }
+       .file-list {
+       	   height: 200px;
+           max-width: 250px;
+           overflow-y: auto; /* Automatically adds scrollbar when needed */
+        }
+       }
+      /* Context menu styles */
+       .context-menu {
+  		   display: none;
+ 		   position: absolute; /* Position it absolutely to the form container */
+ 		   top: 100%; /* Position it right below the input field */
+  		   left: 0;
+  	       background: #2b0300;
+ 		   border: 1px solid #ccc;
+ 		   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+ 		   color: white;
+  		   z-index: 1000;
+  	 	   width: 225px; /* Adjust width as necessary */
+  	       max-height: 150px; /* Optional: limit height */
+  		   overflow-y: auto; /* Optional: add scroll if too many items */
+}
+
+		.context-menu-item {
+  		    padding: 10px;
+    		cursor: pointer;
+   		    color: white;
+		}
+
+		.context-menu-item:hover {
+    		background: red;
+		}
+
+       .progress-bar-container {
+           display: none;
+           width: 100%;
+           background-color: #2b0300;
+           border-radius: 5px;
+           overflow: hidden;
+           margin-top: 20px;
+       }
+       .progress-bar {
+           width: 0%;
+           height: 25px;
+           background-color: red;
+           text-align: center;
+           line-height: 25px;
+           color: white;
+       }
+	   .swal2-title {
+           color: #00ff04;
+           font-size: 3.0rem;
+       }
+       .swal2-title-red {
+           color: #ff0000;
+           font-size: 3.0rem;
+       }
+       .swal2-text {
+           color: black;
+           font-size: 1.0rem;
+       }
+       .custom-swal-icon {
+           margin-bottom: -10px; /* Adjust this value as needed */
+           border: none !important;
+ 		   outline: none !important;
+ 		   box-shadow: none !important; 
+       }
+       .custom-swal-title {
+   		   padding-top: 10px; 
+   		}
+       .custom-swal-title-red {
+   		   padding-top: 10px;
+   		   color: #ff0000;
+   	     }
+   	 .dark {
+   		   background-color: black;
+   		   padding: 10px;
+           border: 2px solid #ccc;
+  		   border-radius: 10px;
+  		   color: white;
+   		   cursor: pointer;
+    	   font-size: 1rem;
+   		   transition: background-color 0.3s ease, transform 0.2s ease;
+   		}
+	.dark:hover {
+  		  background-color: #363229; /* Lighter blue on hover */
+  		  transform: scale(1.05); /* Slightly enlarge the button */
+		}
+
+	.dark:active {
+    	  background-color: darkgrey; /* Darker blue when pressed */
+    	  transform: scale(0.98); /* Slightly shrink the button */
+		}
+
+	.dark:disabled {
+  		  background-color: #00000000;
+  		  cursor: not-allowed;
+  		  }
+  	.darkgreen {
+   		   background-color: darkgreen;
+   		   padding: 10px;
+           border: 2px solid #ccc;
+  		   border-radius: 10px;
+  		   color: white;
+   		   cursor: pointer;
+    	   font-size: 1rem;
+   		   transition: background-color 0.3s ease, transform 0.2s ease;
+   		}
+	.darkgreen:hover {
+  		  background-color: #28bd45; /* Lighter green on hover */
+  		  transform: scale(1.05); /* Slightly enlarge the button */
+		}
+
+	.darkgreen:active {
+    	  background-color: #000000; /* Darker green when pressed */
+    	  transform: scale(0.98); /* Slightly shrink the button */
+		}
+
+	.darkgreen:disabled {
+  		  background-color: #00000000;
+  		  cursor: not-allowed;
+	}
+		.darkblue {
+   		   background-color: darkblue;
+   		   padding: 10px;
+           border: 2px solid #ccc;
+  		   border-radius: 10px;
+  		   color: white;
+   		   cursor: pointer;
+    	   font-size: 1rem;
+   		   transition: background-color 0.3s ease, transform 0.2s ease;
+   		}
+	.darkblue:hover {
+  		  background-color: #3a4ddb; /* Lighter blue on hover */
+  		  transform: scale(1.05); /* Slightly enlarge the button */
+		}
+
+	.darkblue:active {
+    	  background-color: #02087a; /* Darker blue when pressed */
+    	  transform: scale(0.98); /* Slightly shrink the button */
+		}
+
+	.darkblue:disabled {
+  		  background-color: #00000000;
+  		  cursor: not-allowed;
+  		  }
+    	}
+	   }

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.png" type="image/x-icon" />
+    <title>SSHFilesWebGreen</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .scaleA {
+            width: 100%;
+            max-width: max-content;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+			background-image: url("one.png");
+		    background-size: cover;    
+ 		    background-repeat: no-repeat;
+		    background-attachment: fixed;
+        }
+        .main-container {
+            margin-top: 100px;
+            background: #00000000;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            max-width: 600px;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+    		padding-bottom: 50px; /* Add padding at the bottom if needed */}
+        }
+        .centered-link {
+            display: block;
+            text-align: center;
+            color: darkblue;
+            text-decoration: none;
+            margin-top: 10px; /* Adjust as needed */
+            font-weight: bold;
+            position: relative;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .content-container {
+            display: flex;
+            flex-direction: row;
+            background: rgba(2, 24, 0, 0.77);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            gap: 20px;
+            flex-wrap: wrap;
+            
+        }
+        .container {
+            flex: 1;
+            border-radius: 10px;
+            min-width: 250px;
+        }
+        .form-group {
+            position: relative;
+        }
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+            color: white;
+        }
+        .form-group input {
+            width: 75%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-weight: bold;           
+            color: white;
+            background-color: #00000000;
+        }
+        .autocomplete-list {
+            position: relative;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 5px;
+            display: block;
+            max-height: 150px;
+            overflow-y: auto;
+			background-color: darkgreen;
+            color: white;
+        }
+        .autocomplete-item {
+            padding: 8px;
+            cursor: pointer;
+            color: white;
+            display: block;
+            
+            
+        }
+        .autocomplete-item:hover {
+            background-color: green;
+        }
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            width: 75%;
+        }
+        .buttons button {
+   			padding: 10px;
+			border: 1px solid #ccc;
+ 		    border-radius: 5px;
+ 		    background-color: #00000000;
+ 		    color: white;
+ 		    cursor: pointer;
+  			font-size: 1rem;
+   		    transition: background-color 0.3s ease, transform 0.2s ease;
+		}
+
+       .buttons button:hover {
+           background-color: darkgreen; /* Lighter blue on hover */
+           transform: scale(1.05); /* Slightly enlarge the button */
+       }
+       
+       .buttons button:active {
+           background-color: black; /* Darker blue when pressed */
+           transform: scale(0.98); /* Slightly shrink the button */
+       }
+       
+       .buttons button:disabled {
+           background-color: #00000000;
+           cursor: not-allowed;
+       }
+        .file-list {
+           flex: 1;
+           min-width: 0px;
+           height: 500px; /* Ensure height is defined with units */
+           overflow-y: auto; /* Automatically adds scrollbar when needed */
+           padding: 10px;
+           border-radius: 10px;
+           box-sizing: border-box;
+           position: relative; /* Add relative positioning */
+           
+       }
+       .file-list img.centered-image {
+           display: block;
+           margin: 0;
+           position: absolute; /* Position the image absolutely */
+           top: 50%; /* Center vertically */
+           left: 50%; /* Center horizontally */
+           transform: translate(-50%, -50%); /* Adjust the image's center point */
+       }
+               
+         /* Custom scrollbar styles */
+        .file-list::-webkit-scrollbar {
+            width: 12px; /* Width of the scrollbar */
+        }
+        .file-list::-webkit-scrollbar-thumb {
+            background-color: darkgreen; /* Same blue as the buttons */
+            border-radius: 10px; /* Rounded corners */
+        }
+        .file-list::-webkit-scrollbar-track {
+            background-color: #f1f1f1; /* Background color of the scrollbar track */
+        }
+        .file-item::-webkit-scrollbar {
+            width: 12px; /* Width of the scrollbar */
+        }
+        .file-item::-webkit-scrollbar-thumb {
+            background-color: darkgreen; /* Same blue as the buttons */
+            border-radius: 10px; /* Rounded corners */
+        }
+        .file-item::-webkit-scrollbar-track {
+            background-color: #f1f1f1; /* Background color of the scrollbar track */
+        }
+        .file-item {
+            overflow-y: auto;
+            cursor: pointer;
+            padding: 5px;
+            margin: 5px 0;
+            color: white;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+
+        }
+        .file-item:hover {
+            background-color: darkgreen;
+        }
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+        .checkbox-wrapper input {
+            margin-right: 10px;
+        }
+          /* Media queries for responsive design */
+         @media (max-width: 768px) {
+        .content-container {
+        	flex-direction: column;
+        }
+       .file-list {
+       	   height: 200px;
+           max-width: 250px;
+           overflow-y: auto; /* Automatically adds scrollbar when needed */
+        }
+     }
+       /* Context menu styles */
+       .context-menu {
+           display: none;
+           width: 200px;
+           position: absolute;
+           background: darkgreen;
+           border: 1px solid #ccc;
+           border-radius: 5px;
+           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+           color: white;
+           z-index: 100;
+       }
+       .context-menu-item {
+           padding: 10px;
+           border-radius: 5px;
+           cursor: pointer;
+       }
+       .context-menu-item:hover {
+           background: green;
+           border-radius: 5px;
+       }
+       .progress-bar-container {
+    position: relative; /* Position relative to the container */
+    width: 100%;
+    background-color: #f3f3f3;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 20px 0; /* Space between the progress bar and other elements */
+    display: none; /* Initially hidden */
+}
+
+.progress-bar {
+    width: 100%;
+    height: 25px;
+    background-color: #4caf50;
+    text-align: center;
+    line-height: 25px;
+    color: white;
+}
+
+.themes-container {
+    position: sticky;
+    bottom: 0;
+    background-color: #00000000; /* Match the body background color */
+    padding: 10px 0;
+    z-index: 10; /* Ensure it stays on top */
+}
+
+.themes-container h2 {
+    margin: 0;
+    padding: 10px;
+}
+
+.themes-container button {
+    margin-top: 10px;
+}
+/* Ensure the file list and other content does not overlap the themes section */
+.content-container {
+    margin-bottom: 50px; /* Prevents overlap with sticky themes section */
+}
+	   .swal2-title {
+           color: #00ff04;
+           font-size: 3.0rem;
+       }
+       .swal2-title-red {
+           color: #ff0000;
+           font-size: 3.0rem;
+       }
+       .swal2-text {
+           color: black;
+           font-size: 1.0rem;
+           font-weight: bold;
+       }
+       .custom-swal-icon {
+           margin-bottom: -10px; /* Adjust this value as needed */
+           border: none !important;
+ 		   outline: none !important;
+ 		   box-shadow: none !important; 
+       }
+       .custom-swal-title {
+   		   padding-top: 10px; 
+   		}
+       .custom-swal-title-red {
+   		   padding-top: 10px;
+   		   color: #cc0000;
+   	    }
+   	    .darkblue {
+   		   background-color: darkblue;
+   		   padding: 10px;
+           border: 2px solid #ccc;
+  		   border-radius: 10px;
+  		   color: white;
+   		   cursor: pointer;
+    	   font-size: 1rem;
+   		   transition: background-color 0.3s ease, transform 0.2s ease;
+   		}
+		.darkblue:hover {
+  		  background-color: #3a4ddb; /* Lighter blue on hover */
+  		  transform: scale(1.05); /* Slightly enlarge the button */
+		}
+
+		.darkblue:active {
+    	  background-color: #02087a; /* Darker blue when pressed */
+    	  transform: scale(0.98); /* Slightly shrink the button */
+		}
+
+		.darkblue:disabled {
+  		  background-color: #00000000;
+  		  cursor: not-allowed;
+  		  }
+   	   .darkgreen {
+   		   background-color: darkgreen;
+   		   padding: 10px;
+		   border: 1px solid #ccc;
+  		   border-radius: 5px;
+  		   color: white;
+   		   cursor: pointer;
+    	   font-size: 1rem;
+   		   transition: background-color 0.3s ease, transform 0.2s ease;
+		}
+		.darkgreen:hover {
+   		   background-color: #28bd45; /* Lighter green on hover */
+           transform: scale(1.05); /* Slightly enlarge the button */
+       }
+       
+       .darkgreen:active {
+           background-color: black; /* Darker green when pressed */
+           transform: scale(0.98); /* Slightly shrink the button */
+       }
+       
+       .darkgreen:disabled {
+           background-color: #00000000;
+           cursor: not-allowed;
+       }
+       .pin {
+   		   background-color: #3b000f;
+   		   padding: 10px;
+           border: 2px solid #ccc;
+  		   border-radius: 10px;
+  		   color: white;
+   		   cursor: pointer;
+    	   font-size: 1rem;
+   		   transition: background-color 0.3s ease, transform 0.2s ease;
+   		}
+		.pin:hover {
+  		  background-color: #a60029; /* Lighter blue on hover */
+  		  transform: scale(1.05); /* Slightly enlarge the button */
+		}
+
+		.pin:active {
+    	  background-color: #140005; /* Darker blue when pressed */
+    	  transform: scale(0.98); /* Slightly shrink the button */
+		}
+
+		.pin:disabled {
+  		  background-color: #00000000;
+  		  cursor: not-allowed;
+  		  }
+       .dark {
+   		   background-color: black;
+   		   padding: 10px;
+           border: 2px solid #ccc;
+  		   border-radius: 10px;
+  		   color: white;
+   		   cursor: pointer;
+    	   font-size: 1rem;
+   		   transition: background-color 0.3s ease, transform 0.2s ease;
+   		}
+		.dark:hover {
+  		  background-color: #150140; /* Lighter blue on hover */
+  		  transform: scale(1.05); /* Slightly enlarge the button */
+		}
+
+		.dark:active {
+    	  background-color: #12284a; /* Darker blue when pressed */
+    	  transform: scale(0.98); /* Slightly shrink the button */
+		}
+
+		.dark:disabled {
+  		  background-color: #00000000;
+  		  cursor: not-allowed;
+  		  }
+	   }
+      }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+    <center><a href="https://beeralator.com"><img src="metallic.png" alt="SSHFilesWeb" class="scaleA"></a></center>
+    <div class="content-container">
+        <div class="container">
+            <div class="form-group">
+                <label for="remoteIP">Remote IP:</label>
+                <input type="text" id="remoteIP" class="autocomplete">
+            </div>
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" class="autocomplete">
+            </div>
+            <div class="checkbox-wrapper">
+                <strong><label for="savePassword">Save Password?</label></strong>
+                <input type="checkbox" id="savePassword" class="autocomplete">
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" class="autocomplete">
+                <label for="password"></label>
+            </div>
+            <div class="form-group">
+                <label for="port">Port:</label>
+                <input type="number" id="port" value="22">
+            </div>
+            <div class="buttons">
+                <button id="connectButton">Connect</button>
+                <button id="uploadButton" disabled>Upload File</button>
+            </div>
+            <div class="form-group">
+                <input type="file" id="fileInput">
+            </div>
+        </div>
+         <div class="file-list" id="fileListContainer">
+            <img id="placeholderImage" src="leavesdancing.gif" alt="Placeholder Image" class="centered-image" style="display: none;">
+            <div id="fileList"></div>
+        </div>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="progress-bar-container" id="progressBarContainer">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Themes Section -->
+    <div class="themes-container">
+        <center><h2><strong style="color: black; display: table; background-color: white;">Themes:</strong></h2></center>
+        <center>
+            <button class="pin" onclick="document.location='pinups.html'">Pinups</button>&nbsp;&nbsp;
+            <button class="dark" onclick="document.location='dark.html'">Darker</button>&nbsp;&nbsp;
+            <button class="darkblue" onclick="document.location='index.html'">Default</button>
+        </center>
+    </div>
+    
+    <center><strong><a href="https://www.beeralator.com" class="centered-link">beeralator.com</a></strong></center>
+</div>
+<div class="context-menu" id="contextMenu">
+    <div class="context-menu-item" id="openDir">Open Directory</div>
+    <div class="context-menu-item" id="downloadDir">Download Directory</div>
+</div>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let currentDirectory = '';
+    let selectedItem = null;
+    let isConnected = false; // Track connection state
+    const placeholderImage = document.getElementById('placeholderImage');
+    placeholderImage.style.display = 'block'; // Show the placeholder image
+
+    const progressWebSocket = new WebSocket("ws://localhost:8080/progress");
+
+    progressWebSocket.onmessage = function(event) {
+        const progress = parseInt(event.data, 10);
+        updateProgressBar(progress);
+    };
+
+    progressWebSocket.onerror = function(error) {
+        console.error("WebSocket error:", error);
+    };
+
+    function showProgressBar() {
+        const progressBarContainer = document.getElementById('progressBarContainer');
+        progressBarContainer.style.display = 'block';
+        updateProgressBar(0);
+    }
+
+    function updateProgressBar(percent) {
+        const progressBar = document.getElementById('progressBar');
+        progressBar.style.width = percent + '%';
+        progressBar.textContent = percent + '%';
+    }
+
+    function hideProgressBar() {
+        const progressBarContainer = document.getElementById('progressBarContainer');
+        progressBarContainer.style.display = 'none';
+    }
+
+    document.getElementById('uploadButton').addEventListener('click', async () => {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        showProgressBar();
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/ssh/upload', true);
+
+        xhr.onload = () => {
+            hideProgressBar();
+            const filename = file.name;
+            if (xhr.status === 200) {
+                Swal.fire({
+                    iconHtml: '<img src="weedcircle.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Success!',
+                    html: `<strong><span style="color: #00fff7">Uploading the file:</span></strong><br><strong><span style="color: white">${filename}</span></strong><br><strong><span style="color: #00fff7">was successful.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "#00d123",
+                    background: '#002606'
+                });
+                listFiles(currentDirectory); // Refresh the file list after upload
+            } else {
+                Swal.fire({
+                    iconHtml: '<img src="weedcircle_redtwo.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title-red',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Error!',
+                    html: `<strong><span style="color: #00fff7">Uploading the file:</span></strong><br><strong><span style="color: white">${filename}</span></strong><br><strong><span style="color: #00fff7">failed.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "#00d123",
+                    background: '#002606'
+                });
+            }
+        };
+
+        xhr.send(formData);
+    });
+
+    async function downloadFile(directory, filename) {
+        showProgressBar();
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `/api/ssh/download?remoteFilePath=${directory}/${filename}`, true);
+        xhr.responseType = 'blob';
+
+        xhr.addEventListener('progress', (event) => {
+            if (event.lengthComputable) {
+                const percentComplete = Math.round((event.loaded / event.total) * 100);
+                updateProgressBar(percentComplete);
+            }
+        });
+
+        xhr.onload = () => {
+            hideProgressBar();
+            if (xhr.status === 200) {
+                const blob = xhr.response;
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                Swal.fire({
+                    iconHtml: '<img src="weedcircle.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Success!',
+                    html: `<strong><span style="color: #00fff7">Downloading the file:</span></strong><br><strong><span style="color: white">${filename}</span></strong><br><strong><span style="color: #00fff7">was successful.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "#00d123",
+                    background: '#002606'
+                });
+                listFiles(currentDirectory); // Refresh the file list after upload
+            } else {
+                Swal.fire({
+                    iconHtml: '<img src="weedcircle_redtwo.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title-red',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Error!',
+                    html: `<strong><span style="color: #00fff7">Downloading the file:</span></strong><br><strong><span style="color: white">${filename}</span></strong><br><strong><span style="color: #00fff7">failed.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "#00d123",
+                    background: '#002606'
+                });
+            }
+        };
+
+        xhr.send();
+    }
+
+    async function downloadDirectory(directory) {
+        showProgressBar();
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `/api/ssh/download-directory?directory=${encodeURIComponent(directory)}`, true);
+        xhr.responseType = 'blob';
+
+        xhr.addEventListener('progress', (event) => {
+            if (event.lengthComputable) {
+                const percentComplete = Math.round((event.loaded / event.total) * 100);
+                console.log(`Progress: ${percentComplete}% (Loaded: ${event.loaded} bytes, Total: ${event.total} bytes)`);
+                updateProgressBar(percentComplete);
+            }
+        });
+
+        xhr.onload = () => {
+            hideProgressBar();
+            if (xhr.status === 200) {
+                const blob = xhr.response;
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `${directory.split('/').pop()}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                Swal.fire({
+                    iconHtml: '<img src="weedcircle.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Success!',
+                    html: `<strong><span style="color: #00fff7">Downloading the directory:</span></strong><br><strong><span style="color: white">${directory}</span></strong><br><strong><span style="color: #00fff7">was successful.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "#00d123",
+                    background: '#002606'
+                });
+                listFiles(currentDirectory); // Refresh the file list after upload
+            } else {
+                Swal.fire({
+                    iconHtml: '<img src="weedcircle_redtwo.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title-red',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Error!',
+                    html: `<strong><span style="color: #00fff7">Downloading the directory:</span></strong><br><strong><span style="color: white">${directory}</span></strong><br><strong><span style="color: #00fff7">failed.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "#00d123",
+                    background: '#002606'
+                });
+            }
+        };
+
+        xhr.send();
+    }
+
+    function updateLocalStorage(key, value) {
+        let history = JSON.parse(localStorage.getItem(key) || "[]");
+        if (!history.includes(value)) {
+            history.push(value);
+            localStorage.setItem(key, JSON.stringify(history));
+        }
+    }
+
+    function getSuggestions(key, query) {
+        let history = JSON.parse(localStorage.getItem(key) || "[]");
+        return history.filter(item => item.startsWith(query));
+    }
+
+    function showSuggestions(input) {
+        const query = input.value;
+        const key = input.id;
+        const suggestions = getSuggestions(key, query);
+
+        clearSuggestions();
+
+        let list = document.createElement('div');
+        list.className = 'autocomplete-list';
+
+        // Append list to body to avoid any relative positioning issues
+        document.body.appendChild(list);
+
+        // Get the bounding rectangle of the input field
+        const inputRect = input.getBoundingClientRect();
+
+        // Position the list
+        list.style.position = 'absolute';
+        list.style.top = `${inputRect.bottom + window.scrollY}px`; // Calculate the top based on viewport
+        list.style.left = `${inputRect.left + window.scrollX}px`;  // Calculate the left based on viewport
+        list.style.width = `${inputRect.width}px`;
+
+        // Add suggestions
+        suggestions.forEach(suggestion => {
+            let item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            item.textContent = suggestion;
+            item.addEventListener('click', () => {
+                input.value = suggestion;
+                if (key === 'remoteIP' || key === 'username') {
+                    autofillPassword();
+                }
+                clearSuggestions();
+            });
+            list.appendChild(item);
+        });
+    }
+
+    function clearSuggestions() {
+        let lists = document.querySelectorAll('.autocomplete-list');
+        lists.forEach(list => list.remove());
+    }
+
+    function autofillPassword() {
+        const remoteIP = document.getElementById('remoteIP').value;
+        const username = document.getElementById('username').value;
+        const savedPasswords = JSON.parse(localStorage.getItem('savedPasswords') || "{}");
+
+        if (savedPasswords[remoteIP] && savedPasswords[remoteIP][username]) {
+            document.getElementById('password').value = savedPasswords[remoteIP][username];
+            document.getElementById('savePassword').checked = true;
+        } else {
+            document.getElementById('password').value = "";
+            document.getElementById('savePassword').checked = false;
+        }
+    }
+
+    document.querySelectorAll('.autocomplete').forEach(input => {
+        input.addEventListener('input', () => {
+            clearSuggestions();
+            if (input.value) {
+                showSuggestions(input);
+            }
+        });
+    });
+
+    document.getElementById('connectButton').addEventListener('click', async () => {
+        if (isConnected) {
+            await disconnect();
+        } else {
+            await connect();
+        }
+    });
+
+    async function connect() {
+        const remoteIP = document.getElementById('remoteIP').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const port = document.getElementById('port').value;
+
+        const response = await fetch('/api/ssh/connect', {
+            method: 'POST',
+            body: new URLSearchParams({
+                remoteIP,
+                username,
+                password,
+                port
+            })
+        });
+        const result = await response.json();
+        if (response.ok) {
+            document.getElementById('uploadButton').disabled = false;
+            currentDirectory = result.currentDirectory; // Set current directory
+            isConnected = true; // Update connection state
+            document.getElementById('connectButton').textContent = 'Disconnect';
+            await listFiles(currentDirectory); // Populate file list
+        
+        } else {
+        	Swal.fire({
+                iconHtml: '<img src="weedcircle_redtwo.gif" width="100px" height="100px"> ',
+                customClass: {
+                    icon: 'custom-swal-icon',
+                    title: 'custom-swal-title-red',
+                    popup: 'swal2-text'
+                },
+                title: 'Error!',
+                html: `<strong><span style="color: #00fff7">Connection failed.</span></strong>`,
+                width: '400px',
+                confirmButtonColor: "#00d123",
+                background: '#002606'
+            });
+        }
+    }
+
+    async function disconnect() {
+       
+            document.getElementById('uploadButton').disabled = true;
+            isConnected = false; // Update connection state
+            document.getElementById('connectButton').textContent = 'Disconnected';
+            document.getElementById('connectButton').disabled = true;
+
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            placeholderImage.style.display = 'block'; // Show the placeholder image
+            Swal.fire({
+                iconHtml: '<img src="weedcircle.gif" width="100px" height="100px"> ',
+                customClass: {
+                    icon: 'custom-swal-icon',
+                    title: 'custom-swal-title',
+                    popup: 'swal2-text'
+                },
+                title: 'Success!',
+                html: `<strong><span style="color: #00fff7">Disconnecting successful.</span></strong>`,
+                width: '400px',
+                confirmButtonColor: "#00d123",
+                background: '#002606'
+            });
+            const response = await fetch('/api/ssh/disconnect', {
+                method: 'POST'
+            });
+            const result = await response.json();
+
+            if (!response.ok) {
+            	Swal.fire({
+                    iconHtml: '<img src="weedcircle_redtwo.gif" width="100px" height="100px"> ',
+                    customClass: {
+                        icon: 'custom-swal-icon',
+                        title: 'custom-swal-title-red',
+                        popup: 'swal2-text'
+                    },
+                    title: 'Error!',
+                    html: `<strong><span style="color: #00fff7">Disconnecting failed.</span></strong>`,
+                    width: '400px',
+                    confirmButtonColor: "#00d123",
+                    background: '#002606'
+            });
+        }
+    }
+
+    // Call this function after connecting to hide the placeholder image
+    function hidePlaceholderImage() {
+        placeholderImage.style.display = 'none'; // Hide the placeholder image
+    }
+
+    async function listFiles(directory) {
+        try {
+            const response = await fetch(`/api/ssh/list?directory=${encodeURIComponent(directory)}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch file list');
+            }
+            const fileList = await response.json();
+
+            const fileListElement = document.getElementById('fileList');
+            placeholderImage.style.display = 'none';
+            fileListElement.innerHTML = '';
+
+            if (!placeholderImage) {
+                console.error('placeholderImage element not found.');
+                return;
+            }
+
+            if (Array.isArray(fileList) && fileList.length > 0) {
+                placeholderImage.style.display = 'none';
+                fileList.forEach(file => {
+                    const div = document.createElement('div');
+                    div.textContent = file.name;
+                    div.classList.add('file-item');
+                    div.dataset.type = file.type;
+                    div.addEventListener('click', async (event) => {
+                        if (event.button === 0) {
+                            if (file.type === 'file') {
+                                await downloadFile(directory, file.name);
+                            } else if (file.type === 'directory') {
+                                await openDirectory(directory, file.name);
+                            }
+                        }
+                    });
+                    div.addEventListener('contextmenu', (event) => {
+                        event.preventDefault();
+                        if (file.type === 'directory') {
+                            selectedItem = file;
+                            showContextMenu(event);
+                        }
+                    });
+                    fileListElement.appendChild(div);
+                });
+            } else {
+                placeholderImage.style.display = 'block';
+            }
+        } catch (error) {
+            console.error("Failed to list files:", error);
+        }
+    }
+
+    async function openDirectory(currentDir, dirName) {
+        const newDirectory = `${currentDir}/${dirName}`;
+        currentDirectory = newDirectory; // Update the current directory
+        await listFiles(newDirectory);
+    }
+
+    document.getElementById('openDir').addEventListener('click', async () => {
+        if (selectedItem) {
+            await openDirectory(currentDirectory, selectedItem.name);
+        }
+    });
+
+    document.getElementById('downloadDir').addEventListener('click', async () => {
+        if (selectedItem) {
+            await downloadDirectory(`${currentDirectory}/${selectedItem.name}`);
+        }
+    });
+
+    function showContextMenu(event) {
+        const contextMenu = document.getElementById('contextMenu');
+        contextMenu.style.top = `${event.clientY}px`;
+        contextMenu.style.left = `${event.clientX}px`;
+        contextMenu.style.display = 'block';
+
+        document.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+        }, { once: true });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.matches('.autocomplete, .autocomplete-list, .autocomplete-item')) {
+            clearSuggestions();
+        }
+    });
+
+    document.getElementById('remoteIP').addEventListener('blur', autofillPassword);
+    document.getElementById('username').addEventListener('blur', autofillPassword);
+});
+
+</script>
+</body>
+</html>

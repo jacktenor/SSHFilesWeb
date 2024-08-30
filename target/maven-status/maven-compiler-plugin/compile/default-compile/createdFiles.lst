@@ -1,0 +1,11 @@
+com/sativa/sshfilesweb/SSHController.class
+com/sativa/sshfilesweb/SSHController$FileInfo.class
+com/sativa/sshfilesweb/ProgressWebSocketHandler.class
+com/sativa/sshfilesweb/WebSocketConfig.class
+com/sativa/sshfilesweb/SSHFilesWebApplication.class
+com/sativa/sshfilesweb/JobScheduler.class
+com/sativa/sshfilesweb/FileProgressMonitor.class
+com/sativa/sshfilesweb/BrowserLauncher.class
+com/sativa/sshfilesweb/SSHController$ConnectResponse.class
+com/sativa/sshfilesweb/DatabaseManager.class
+com/sativa/sshfilesweb/BackendShutdownService.class
